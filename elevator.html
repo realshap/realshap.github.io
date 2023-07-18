@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Hiss Simulation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        nav {
+            background-color: #666;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        nav {
+            background-color: #666;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #f10a0a;
+            color: #fff;
+            padding: 30px 60px;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+            top: 6.5%;
+            left: 10%;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            /* Center the button */
+        }
+
+        /*.button1 {
+    background-color: #b8b2b2;
+    color: #fff;
+    padding: 5px 5px;
+    border-radius: 100px;
+    top: 50%;
+    left: 90%;
+  }
+
+  .button2 {
+    background-color: #b8b2b2;
+    color: #fff;
+    padding: 5px 5px;
+    border-radius: 100px;
+    top: 54%;
+    left: 90%;
+  }
+
+  .button3 {
+    background-color: #b8b2b2;
+    color: #fff;
+    padding: 5px 5px;
+    border-radius: 100px;
+    top: 58%;
+    left: 90%;
+  }*/
+
+        .button:hover {
+            background-color: #701010;
+        }
+
+        #elevator-canvas {
+            height: 1200px;
+            width: 400px;
+        }
+
+        #button-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .content {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+        }
+
+        .control-button {
+            border-radius: 10px;
+            padding: 10px;
+        }
+    </style>
+    <script>
+        let ctx = null;
+        let canvas = null;
+
+        const buildingpadding = 245;
+        let currentfloor = 518;
+        let targetFloor = 518;
+        let doorState = 0;
+        let targetDoorState = 0;
+        function loadImage(fileName) {
+            const image = new Image();
+            image.src = fileName;
+            return image;
+        }
+
+        const images = {
+            518: loadImage('1elevator.png'),
+            418: loadImage('2elevator.png'),
+            318: loadImage('3elevator.png'),
+            218: loadImage('4elevator.png'),
+            118: loadImage('5elevator.png'),
+            18: loadImage('6elevator.png'),
+        };
+
+        let currentImage = images[518];
+
+        function drawLift() {
+            ctx.fillRect(buildingpadding + 10, currentfloor, 80, 80);
+            ctx.clearRect(buildingpadding + 10 + 40 - doorState * 3, currentfloor + 5, doorState * 3 * 2, 70);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillRect(buildingpadding, 5, 100, 600);
+            ctx.clearRect(buildingpadding + 5, 10, 90, 590);
+            ctx.drawImage(currentImage, 0, 0, 90, 120);
+
+            drawLift();
+
+            /*ctx.drawImage(image1, 0, 538, 30, 40);*/
+        }
+
+        function init() {
+            canvas = document.getElementById("elevator-canvas");
+            ctx = canvas.getContext("2d");
+            canvas.setAttribute('width', '400');
+            canvas.setAttribute('height', '1200');
+            draw();
+
+            setInterval(function () {
+                if (doorState < targetDoorState) {
+                    doorState += 1;
+                } else if (doorState > targetDoorState) {
+                    doorState -= 1;
+                } else if (currentfloor > targetFloor) {
+                    currentfloor = currentfloor - 5;
+                } else if (currentfloor < targetFloor) {
+                    currentfloor = currentfloor + 5;
+                }
+
+                if (currentfloor in images) {
+                    currentImage = images[currentfloor];
+                }
+                draw();
+            }, 100);
+        }
+        function choosefloor(floor) {
+
+            if (targetDoorState == 0 && doorState == 0) {
+                targetFloor = floor;
+            }
+        }
+
+        function closeDoor() {
+            if (currentfloor == targetFloor) {
+                targetDoorState = 0;
+            }
+        }
+
+        function openDoor() {
+            if (currentfloor == targetFloor) {
+                targetDoorState = 10;
+            }
+        }
+
+        function moveup() {
+            currentfloor = currentfloor + 100;
+            draw();
+        }
+
+        function movedown() {
+            currentfloor = currentfloor - 100;
+            draw();
+        }
+        const audio = new Audio('elevator-music.mp3');
+        let isPlaying = false;
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            if (isPlaying) {
+                audio.play();
+            } else {
+                audio.pause();
+            }
+        }
+
+        window.onload = init;
+    </script>
+</head>
+
+<body>
+
+    <header>
+        <h1>Här kan du testa hissen</h1>
+        <a href="./home.html"><button class="button"> Gå tillbaka!</button></a>
+
+    </header>
+    <div class="content">
+        <canvas id="elevator-canvas"></canvas>
+        <div id="button-panel">
+            <table>
+                <tr>
+                    <td><button class="control-button" onclick="choosefloor(518)">1</button></td>
+                    <td><button class="control-button" onclick="choosefloor(418)">2</button></td>
+                    <td><button class="control-button" onclick="choosefloor(318)">3</button></td>
+                </tr>
+                <tr>
+                    <td><button class="control-button" onclick="choosefloor(218)">4</button></td>
+                    <td><button class="control-button" onclick="choosefloor(118)">5</button></td>
+                    <td><button class="control-button" onclick="choosefloor(18)">6</button></td>
+                </tr>
+                <tr>
+                    <td><button class="control-button" onclick="openDoor()">⏴⏵</button></td>
+                    <td><button class="control-button" onclick="closeDoor()">⏵⏴</button></td>
+                    <td><button class="control-button" onclick="togglePlay()">♫</button></td>
+                </tr>
+            </table>
+
+        </div>
+    </div>
+
+
+
+</body>
+
+</html>
